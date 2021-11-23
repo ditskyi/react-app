@@ -1,0 +1,35 @@
+.add-todo-modal {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    background: rgb(0, 0, 0, .5);
+    display: flex;
+    justify-content: center;
+    padding-top: 5rem; 
+}
+.add-todo-modal-body {
+    padding: 2rem;
+    width: 500px;
+    border-radius: 5px;
+    background: #fff;
+    height: 50px;
+    display: flex;
+    justify-content: space-between;
+}
+.add-todo-modal-body input {
+    width: 70%;
+    font-size: 15px;
+    padding: 10px;
+    font-weight: 500;
+    position: relative;
+}
+
+.add-todo-modal-body button {
+    position: relative;
+    float: right;
+    width: 20%;
+    height: auto;
+    margin-left: 15px;
+}

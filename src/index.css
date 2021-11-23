@@ -11,3 +11,83 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.wrapper {
+  margin: 0 auto;
+  width: 50%;
+  padding-top: 5rem;
+}
+
+.btn {
+  border-radius: 5px;
+  font-weight: 500;
+  font-size: 16px;
+  background-color: #8052ec;
+  border: 1px transparent solid;
+  color: #ffffff;
+  cursor: pointer;
+  outline: none;
+}
+
+.btn-delete {
+  height: 30px;
+}
+
+.done {
+  text-decoration: line-through;
+}
+
+.lds-dual-ring {
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+}
+.lds-dual-ring:after {
+  content: " ";
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin: 8px;
+  border-radius: 50%;
+  border: 6px solid blue;
+  border-color: blue transparent blue transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.checked {
+  background-color: darkgrey;
+  opacity: 0.5;
+}
+
+.delition {
+  animation: opacity 1s ease-in-out;
+}
+
+@keyframes opacity {
+  from {
+      opacity: 1;
+  }
+  to {
+      opacity: 0;
+  }
+}
+
+.header {
+  margin: 0 auto;
+}
+
+.btn-logout {
+  height: 30px;
+  float: right;
+  margin-right: 4rem;
+  margin-top: 0.5rem;
+}
+
