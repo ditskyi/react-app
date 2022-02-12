@@ -3,19 +3,17 @@ import { Redirect, Route, Switch } from 'react-router-dom';
 import Auth from './AuthList/AuthList'
 import TodoForm from './TodoForm/TodoForm';
 
-
-class AppRouter extends React.Component {
-  render() {
+function AppRouter(props) {
     return (
       <Switch>
         <Route path="/auth" exact render={()=>(
-        this.props.user ? (<Redirect to="/todos"/>) : (<Auth user={this.props.user}/>)
+        props.user ? (<Redirect to="/todos"/>) : (<Auth user={props.user}/>)
         )} /> 
         <Route path="/todos" exact render={()=>(
-          this.props.user ? (<TodoForm user={this.props.user}/>) : (<Redirect to="/auth"/>)
+          props.user ? (<TodoForm user={props.user}/>) : (<Redirect to="/auth"/>)
           )} />
       </Switch>
     )
-  }
 }
+
 export default AppRouter

@@ -14,7 +14,6 @@ function submitHandler(event) {
         alert("Please fill a todo!");
     } else
     if (value.trim()) {
-        // console.log('value', value)
         onCreate(value)
         setState({ isOpen: false })
         setValue('')

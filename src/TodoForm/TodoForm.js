@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import TodoList from './TodoList/TodoList';
 import Context from '../context';
 import Loader from '../loader'; 
 import AddTodo from './AddTodo/AddTodo';
-import {database} from '../Firebase'
+import {database} from '../Firebase';
 import Header from '../Header/Header';
 
 const styles = {
@@ -17,114 +17,115 @@ const styles = {
     }
 }
 
-class TodoForm extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            error: null,
-            isLoaded: false,
-            todos: [],
-            user: {}
-        };
-    }
+function TodoForm({ user }) {
 
-    completeTodo = (id) => {
-        return (event) => {
-            this.setState(this.state.todos.map(todo => {
-                if(todo.id === id) {
-                    todo.status = !todo.status
-                    if (todo.status === true) {
-                        database.ref('ToDo').child(todo.id).update({ dateUpdated: Date.now()})
-                        database.ref('ToDo').child(todo.id).update({ status: true })  
-                    } else {
-                        database.ref('ToDo').child(todo.id).update({ dateUpdated: Date.now()})
-                        database.ref('ToDo').child(todo.id).update({ status: false })
+    const [todos, setTodos] = useState([]);
+    const [isLoaded, setLoaded] = useState(false);
+    const [error, setError] = useState(null);
+
+    const currentUserId = user.uid;
+
+    const getTodoListFromDatabase = useCallback(() => {
+        try {
+            database.ref('ToDo').get()
+            .then(response => response.val())
+            .then(response => response ? Object.keys(response).map(key => ({
+                    ...response[key],
+                    id: key
+                })) : []
+            )
+            .then(response => response.filter(todo => {
+                return (todo.userId === currentUserId) && (todo.status !== 'archived');
+            })     
+            )
+            .then((item) => {
+                setTodos(item);
+                setLoaded(true);
+                },
+                (error) => {
+                    setLoaded(true);
+                    setError(error);
                     }
+            ) 
+        } catch (error) {
+            console.error(error)
+        }
+    },[currentUserId])
+
+    useEffect(() => {
+        getTodoListFromDatabase(); 
+    },[user]);
+   
+    function completeTodo(id) {
+        try {
+            todos.map(todo => {
+            if(todo.id === id) {
+                todo.status = !todo.status
+                if (todo.status === true) {
+                    database.ref('ToDo').child(todo.id).update({ dateUpdated: Date.now()})
+                    database.ref('ToDo').child(todo.id).update({ status: true })  
+                } else {
+                    database.ref('ToDo').child(todo.id).update({ dateUpdated: Date.now()})
+                    database.ref('ToDo').child(todo.id).update({ status: false })
                 }
-                return todo
-            }))
+            }
+            return todo
+            })
+            return getTodoListFromDatabase();
+        } catch(error) {
+            console.error(error)
         }
     }
 
-    deleteTodo = (id) => {
-        this.setState(this.state.todos.map(todo => {
-            if(todo.id === id) {
-                database.ref('ToDo').child(todo.id).update({ status: 'archived' })
-                database.ref('ToDo').child(todo.id).update({ dateUpdated: Date.now()})
-                this.getTodoListFromDatabase()
-            }
-        }))
-    }
-
-    addTodo = async(title) => {
+    function deleteTodo(id) {
         try {
-            await database.ref('ToDo').push({
-                userId: this.props.user._delegate.uid,
-                dateCreated: Date.now(),
-                dateUpdated: Date.now(),
-                status: false,
-                title: title
-            });
-            return this.getTodoListFromDatabase()
+            todos.map((todo) => {
+                if(todo.id === id) {
+                    database.ref('ToDo').child(todo.id).update({ status: 'archived' });
+                    database.ref('ToDo').child(todo.id).update({ dateUpdated: Date.now()});
+                } else return todo;
+            })
+            return getTodoListFromDatabase();
         } catch (error) {
             console.error(error);
         }        
     }
 
-    getTodoListFromDatabase = () => {
+    async function addTodo(title) {
         try {
-            database.ref('ToDo').get()
-        .then(response => response.val())
-        .then(response => response ? Object.keys(response).map(key => ({
-                ...response[key],
-                id: key
-            })) : []
-        )
-        .then(response => response.filter(todo => {
-            return (todo.userId === this.props.user._delegate.uid) && (todo.status !== 'archived');
-        })     
-        )
-        .then((item) => {this.setState({
-            isLoaded: true,
-            todos: item
-        });
-            },
-            (error) => {
-                this.setState({
-                isLoaded: true,
-                error
-                });
-            }
-        ) 
+            await database.ref('ToDo').push({
+                userId: currentUserId,
+                dateCreated: Date.now(),
+                dateUpdated: Date.now(),
+                status: false,
+                title: title
+            });
+            return getTodoListFromDatabase();
         } catch (error) {
-            console.error(error)
-        }
+            console.error(error);
+        }        
     }
 
-    componentDidMount(){
-        this.getTodoListFromDatabase()
-    }
 
-    render() {
-        const { error, isLoaded } = this.state;
-        if (error) {
-          return <div>Ошибка: {error.message}</div>;
-        } else if (!isLoaded) {
-          return <Loader></Loader>;
-        } else {
-        return (
-                <Context.Provider value={{deleteTodo: this.deleteTodo}}>
-                   <Header></Header>
-                    <div className='wrapper'>
-                        <span style={styles.span}>
-                            <h3>My Todo List</h3>
-                            <AddTodo onCreate={this.addTodo}></AddTodo>
-                        </span>
-                        {this.state.todos.length ? <TodoList todos={this.state.todos} onComplete={this.completeTodo} ></TodoList> : <p>No todos!</p>}
-                    </div>
-                </Context.Provider>
-        )
-        }
+    if (error) {
+        return <div>Ошибка: {error.message}</div>;
+    } else if (!isLoaded) {
+        return <Loader></Loader>;
+    } else {
+        user={user}
+    return (
+        <Context.Provider value={{ deleteTodo }}>
+            <Header user={user}></Header>
+            <div className='wrapper'>
+                <span style={styles.span}>
+                    <h3>My Todo List</h3>
+                    <AddTodo onCreate={addTodo}></AddTodo>
+                </span>
+                {todos.length ? <TodoList todos={todos} onComplete={completeTodo} ></TodoList> : <p>No todos!</p>}
+            </div>
+        </Context.Provider>
+    )
     }
 }
+
 export default TodoForm

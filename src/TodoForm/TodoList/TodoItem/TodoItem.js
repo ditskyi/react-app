@@ -25,7 +25,7 @@ function TodoItem ({ todo, onChange }) {
     }
 
     return (
-        <li style={styles.li} className={classes.join(' ')} key={todo.id}>
+        <li style={styles.li} className={classes.join(' ')} key={Math.random()}>
             <div>
                 <input type='checkbox' checked={todo.status} style={styles.input} onChange={onChange}></input>
                 <span>{todo.title}</span>

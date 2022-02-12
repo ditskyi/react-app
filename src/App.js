@@ -1,41 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import AppRouter from './AppRouter';
-import { auth } from './Firebase'
+import { firebaseApp } from './Firebase';
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
-class App extends React.Component {
-  constructor(props){
-    super(props);
-    this.state = {
-      user:{},
-    }
-  }
+function App () {
+
+  const [currentUser, setCurrentUser] = useState([]);
 
   //When component is done rendering for the first time
-  componentDidMount(){
-    this.authListener();
+  useEffect(() => {
+    authListener();
+  },[]);
+
+   // If user logs in (if) or out (else) this is called
+  function authListener() {
+    const auth = getAuth(firebaseApp);
+    onAuthStateChanged(auth, (user) => {
+    if (user) {
+      setCurrentUser(user)
+    } else {
+      setCurrentUser(null)
+    }
+    }); 
   }
 
-  // If user logs in (if) or out (else) this is called
-  authListener() {
-    auth.onAuthStateChanged((user) => {
-      console.log(user);
-      if (user) {
-        this.setState({ user });
-      } else {
-        this.setState({ user: null });
-      }
-    });
-  }
-
-
-  render() {
-    return (
+  return (
       <BrowserRouter>
-        <AppRouter user={this.state.user}/>
+        <AppRouter user={currentUser}/>
       </BrowserRouter>
-    );
-  }
+  );
 }
 
 export default App;
